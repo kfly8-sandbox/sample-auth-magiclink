@@ -1,0 +1,2 @@
+ALTER TABLE "private"."refresh_tokens" ADD COLUMN "device_fingerprint_hash" varchar(255);--> statement-breakpoint
+CREATE UNIQUE INDEX "user_device_unique_index" ON "private"."refresh_tokens" USING btree ("user_id","device_fingerprint_hash");

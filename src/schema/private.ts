@@ -31,7 +31,8 @@ export const emailVerificationTokenTable = privateSchema.table('email_verificati
     // 認証トークンの最後に検証された日時
     lastVerifiedAt: t.timestamp('last_verified_at'),
     // デバイスフィンガープリントのハッシュ値
-    // 普段と異なるデバイスからメール検証を求めている場合に、ユーザーにその旨を通知するために利用する
+    // 利用例:
+    // - 普段と異なるデバイスからメール検証を求めている場合に、ユーザーにその旨を通知するために利用する
     deviceFingerprintHash: t.varchar('device_fingerprint_hash', { length: 255 }),
     createdAt,
     updatedAt,
@@ -55,6 +56,8 @@ export const refreshTokenTable = privateSchema.table('refresh_tokens',
     expiredAt: t.timestamp('expired_at').notNull(),
     // リフレッシュトークンを発行したユーザーのID
     userId: t.uuid('user_id').references(() => userTable.id).notNull(),
+    // リフレッシュトークンを発行したユーザーのデバイスフィンガープリントのハッシュ値
+    deviceFingerprintHash: t.varchar('device_fingerprint_hash', { length: 255 }),
     // リフレッシュトークンがローテーションした回数
     // アクセストークンのリフレッシュを行うたびに、リフレッシュトークンがローテーションされる
     rotationCount: t.integer('rotation_count').notNull().default(0),
@@ -63,6 +66,7 @@ export const refreshTokenTable = privateSchema.table('refresh_tokens',
   },
   (table) => [
     t.uniqueIndex('refresh_tokens_hashed_refresh_token_unique_index').on(table.hashedRefreshToken),
+    t.uniqueIndex('user_device_unique_index').on(table.userId, table.deviceFingerprintHash),
     // 有効期限切れになったトークを取得し、削除するためのインデックス
     t.index('refresh_tokens_expired_at_index').on(table.expiredAt),
   ],
