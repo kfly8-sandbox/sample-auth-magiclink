@@ -1,10 +1,15 @@
 import { Hono } from 'hono'
+import { renderer } from './renderer'
+
+import App from '@/blocks/App'
 
 const app = new Hono()
 
+app.use(renderer)
+
 // ルートへのアクセスを認証ページにリダイレクト
 app.get('/', (c) => {
-  return c.redirect('/auth')
+  return c.render(<App/>)
 })
 
 // API エンドポイント (実装予定)

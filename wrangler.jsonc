@@ -1,10 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "sample-auth-magiclink",
-  "main": "src/index.ts",
+  "main": "src/index.tsx",
   "compatibility_date": "2025-05-16",
   "assets": {
-    "directory": "./public"
+    "directory": "./dist"
   }
   // "compatibility_flags": [
   //   "nodejs_compat"

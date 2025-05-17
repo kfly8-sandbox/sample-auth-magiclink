@@ -1,5 +1,6 @@
 # prod
-dist/
+dist
+dist-ssr
 
 # dev
 .yarn/
@@ -31,3 +32,5 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+*.local
