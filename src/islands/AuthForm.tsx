@@ -36,7 +36,7 @@ export const AuthForm = () => {
       <CardHeader>
         <CardTitle>Sign in to your account</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          We'll send you a magic link to your email to sign in
+          We'll send you a verification code to your email to sign in
         </CardDescription>
       </CardHeader>
       <form action={handleSubmit}>
@@ -94,7 +94,7 @@ export const AuthForm = () => {
                 Sending...
               </>
             ) : (
-              "Send Magic Link"
+              "Send Verification Code"
             )}
           </Button>
         </CardFooter>

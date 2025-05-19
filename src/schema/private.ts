@@ -12,10 +12,10 @@ import { id, createdAt, updatedAt, privateSchema } from './helper';
 export const emailVerificationTokenTable = privateSchema.table('email_verification_tokens',
   {
     id,
-    // 検証対象のメールアドレス
-    email: t.varchar('email', { length: 255 }).notNull(),
-    // マジックリンクによるに認証用のトークン
-    hashedAuthorizationToken: t.varchar('hashed_authorization_token', { length: 255 }).notNull(),
+    // 検証対象のメールアドレス（検索用）
+    hashedEmail: t.varchar('hashedEmail', { length: 255 }).notNull(),
+    // 暗号化されたメールアドレス
+    encryptedEmail: t.varchar('encrypted_email', { length: 255 }).notNull(),
     // 手入力用の短い認証コード
     hashedShortAuthorizationCode: t.varchar('hashed_short_authorization_code', { length: 255 }).notNull(),
     // トークンの検証の状態
@@ -38,10 +38,11 @@ export const emailVerificationTokenTable = privateSchema.table('email_verificati
     updatedAt,
   },
   (table) => [
-    t.uniqueIndex('email_authorization_token_unique_index').on(table.email, table.hashedAuthorizationToken),
-    t.uniqueIndex('email_short_authorization_code_unique_index').on(table.email, table.hashedShortAuthorizationCode),
+    t.uniqueIndex('email_short_authorization_code_unique_index').on(table.hashedEmail, table.hashedShortAuthorizationCode),
     // 有効期限切れになったトークを取得し、削除するためのインデックス
     t.index('email_verification_tokens_expired_at_index').on(table.expiredAt),
+    // 同一デバイスから、複数のメールアドレスを短期間に入力している場合、アカウント偽造が疑われる為、それを抽出するためのインデックス
+    t.index('email_verification_tokens_device_fingerprint_hash_index').on(table.deviceFingerprintHash),
   ]
 )
 
@@ -77,11 +78,14 @@ export const sensitiveUserTable = privateSchema.table('sensitive_users',
   {
     id,
     userId: t.uuid('user_id').references(() => userTable.id).notNull(),
-    email: t.varchar('email', { length: 255 }).notNull(),
+    // ユーザーのメールアドレスのハッシュ値（検索用途）
+    hashedEmail: t.varchar('hashed_email', { length: 255 }).notNull(),
+    // ユーザーのメールアドレスの暗号化された値
+    encryptedEmail: t.varchar('encrypted_email', { length: 255 }).notNull(),
   },
   (table) => [
     t.uniqueIndex('user_unique_index').on(table.userId),
-    t.uniqueIndex('email_unique_index').on(table.email),
+    t.uniqueIndex('hashed_email_unique_index').on(table.hashedEmail),
   ]
 )
 
