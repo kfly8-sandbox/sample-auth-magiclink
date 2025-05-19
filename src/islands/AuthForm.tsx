@@ -34,9 +34,9 @@ export const AuthForm = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Authenticate to your account</CardTitle>
-        <CardDescription>
-          Enter your email below to receive an authentication code.
+        <CardTitle>Sign in to your account</CardTitle>
+        <CardDescription className="text-xs text-muted-foreground">
+          We'll send you a magic link to your email to sign in
         </CardDescription>
       </CardHeader>
       <form action={handleSubmit}>
