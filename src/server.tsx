@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { renderer } from './renderer'
 
 import Auth from '@/pages/Auth'
+import $Sandbox from '@/islands/Sandbox'
 
 const app = new Hono()
 
@@ -36,6 +37,16 @@ app.post('/api/auth/verify', async (c) => {
   // 3. JWTの発行
 
   return c.json({ success: true, token: "dummy_token" })
+})
+
+app.get('/sandbox', (c) => {
+
+  return c.render(
+    <>
+      <h1>Sandbox</h1>
+      <$Sandbox />
+    </>
+  )
 })
 
 export default app

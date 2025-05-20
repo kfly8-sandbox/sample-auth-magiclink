@@ -1,4 +1,5 @@
 import { reactRenderer } from '@hono/react-renderer'
+import $Toaster from '@/islands/Toaster'
 
 export const renderer = reactRenderer(({ children }) => {
   return (
@@ -9,6 +10,7 @@ export const renderer = reactRenderer(({ children }) => {
       </head>
       <body>
         <div id="app">{children}</div>
+        <$Toaster richColors duration={5000}/>
       </body>
     </html>
   )
