@@ -15,42 +15,20 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useActionState } from "react"
 import { Link } from "@/components/ui/link"
 import { Loader2 } from "lucide-react"
-import { verifyEmail, verifyCode } from "@/actions/auth"
+import { signup, signin, verifyCode } from "@/actions/auth"
 import { toast } from "sonner"
 
-type AuthPhase = "verifyEmail" | "verifyCode"
-
-export const AuthForm = () => {
-  const [phase, setPhase] = useState<AuthPhase>("verifyEmail")
-  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null)
-
-  switch (phase) {
-    case("verifyEmail"):
-      return <VerifyEmailForm setPhase={setPhase} setVerifiedEmail={setVerifiedEmail} />
-    case("verifyCode"):
-      return <VerifyCodeForm setPhase={setPhase} email={verifiedEmail!} />
-  }
-}
-
-type VerifyEmailFormProps = {
-  setPhase: (phase: AuthPhase) => void
-  setVerifiedEmail: (email: string | null) => void
-}
-
-const VerifyEmailForm = ({ setPhase, setVerifiedEmail }: VerifyEmailFormProps) => {
+const SignUpForm = () => {
   const [email, setEmail] = useState<string>("")
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false)
   const [verified, formAction, isPending] = useActionState(
     async () => {
 
-      const res = await verifyEmail({ email, termsAccepted})
+      const res = await signup({ email, termsAccepted })
       if (res.success === false) {
         toast.error(res.error.message)
         return false
       }
-
-      setVerifiedEmail(email)
-      setPhase("verifyCode")
 
       return true;
   }, false)
@@ -58,7 +36,7 @@ const VerifyEmailForm = ({ setPhase, setVerifiedEmail }: VerifyEmailFormProps) =
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sign in to your account</CardTitle>
+        <CardTitle>Sign up to your account</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
           We'll send you a verification code to your email to sign in
         </CardDescription>
@@ -110,7 +88,7 @@ const VerifyEmailForm = ({ setPhase, setVerifiedEmail }: VerifyEmailFormProps) =
 
         </CardContent>
         <CardFooter className="pt-4">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full" disabled={isPending || !(email && termsAccepted)}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -126,12 +104,63 @@ const VerifyEmailForm = ({ setPhase, setVerifiedEmail }: VerifyEmailFormProps) =
   );
 }
 
-type VerifyCodeFormProps = {
-  setPhase: (phase: AuthPhase) => void
-  email: string
+const SignInForm = () => {
+  const [email, setEmail] = useState<string>("")
+  const [verified, formAction, isPending] = useActionState(
+    async () => {
+
+      const res = await signin({ email })
+      if (res.success === false) {
+        toast.error(res.error.message)
+        return false
+      }
+
+      return true;
+  }, false)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign in to your account</CardTitle>
+        <CardDescription className="text-xs text-muted-foreground">
+          We'll send you a verification code to your email to sign in
+        </CardDescription>
+      </CardHeader>
+      <form action={formAction}>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="name@example.com"
+              required
+              disabled={isPending}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+        </CardContent>
+        <CardFooter className="pt-4">
+          <Button type="submit" className="w-full" disabled={isPending || !(email)}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              "Send Verification Code"
+            )}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
 }
 
-const VerifyCodeForm = ({ setPhase, email } : VerifyCodeFormProps) => {
+const VerifyCodeForm = () => {
   const [verificationCode, setVerificationCode] = useState<string>("")
   const [verified, formAction, isPending] = useActionState(
     async (prevState: boolean, formData: FormData) => {
@@ -155,7 +184,7 @@ const VerifyCodeForm = ({ setPhase, email } : VerifyCodeFormProps) => {
       <CardHeader>
         <CardTitle>Sign in to your account</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          We'll send you a verification code to your email to sign in
+          Enter the 6-digit code sent to your email
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
@@ -175,16 +204,10 @@ const VerifyCodeForm = ({ setPhase, email } : VerifyCodeFormProps) => {
               onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
               className="text-center text-lg tracking-widest"
             />
-            <p className="text-xs text-muted-foreground">Enter the 6-digit code sent to {email}</p>
           </div>
 
-          {verified && (
-            <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
-              <p>Verification successful! Redirecting to your account...</p>
-            </div>
-          )}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
+        <CardFooter className="pt-4">
           <Button type="submit" className="w-full" disabled={isPending || verificationCode.length !== 6}>
             {isPending ? (
               <>
@@ -201,5 +224,14 @@ const VerifyCodeForm = ({ setPhase, email } : VerifyCodeFormProps) => {
   )
 }
 
-export default $island(AuthForm)
+const islandOptions = { basename: 'AuthForm' }
+const $SignUpForm = $island(SignUpForm, islandOptions)
+const $SignInForm = $island(SignInForm, islandOptions )
+const $VerifyCodeForm = $island(VerifyCodeForm, islandOptions)
+
+export {
+  SignUpForm, $SignUpForm,
+  SignInForm, $SignInForm,
+  VerifyCodeForm, $VerifyCodeForm
+}
 

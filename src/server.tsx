@@ -1,23 +1,39 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
 
-import Auth from '@/pages/Auth'
+import * as Auth from '@/pages/Auth'
 import $Sandbox from '@/islands/Sandbox'
+import { Link } from '@/components/ui/link'
 
 const app = new Hono()
 
 app.use(renderer)
 
 app.get('/', (c) => {
-  return c.redirect('/auth')
+  return c.render(
+    <>
+      <h1>Welcome to the sample project</h1>
+      <ul>
+        <li><Link href="/signup" className="text-primary underline">signup</Link></li>
+        <li><Link href="/signin" className="text-primary underline">signin</Link></li>
+      </ul>
+    </>
+  )
 })
 
-app.get('/auth', (c) => {
-  return c.render(<Auth />)
+app.get('/signup', (c) => {
+  return c.render(<Auth.SignUpPage />)
 })
 
-// API エンドポイント (実装予定)
-app.post('/api/auth/magic-link', async (c) => {
+app.get('/signin', (c) => {
+  return c.render(<Auth.SignInPage />)
+})
+
+app.get('/verify-code', (c) => {
+  return c.render(<Auth.VerifyCodePage />)
+})
+
+app.post('/api/auth/signup', async (c) => {
   const { email } = await c.req.json<{ email: string }>()
 
   // TODO: メール送信とトークン生成の実装
@@ -28,7 +44,13 @@ app.post('/api/auth/magic-link', async (c) => {
   return c.json({ success: true })
 })
 
-app.post('/api/auth/verify', async (c) => {
+app.post('/api/auth/signin', async (c) => {
+  const { email } = await c.req.json<{ email: string }>()
+
+  return c.json({ success: true })
+})
+
+app.post('/api/auth/verify-code', async (c) => {
   const { email, code } = await c.req.json<{ email: string, code: string }>()
 
   // TODO: 認証コードの検証の実装

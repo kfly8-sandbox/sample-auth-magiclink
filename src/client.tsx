@@ -93,9 +93,11 @@ async function hydrateAllIslands() {
             processedInThisBatch < batchSize) {
         const island = islands[index];
         const componentName = island.getAttribute('data-app-component')!;
+        const basename = island.getAttribute('data-app-basename') || componentName;
+        const modulePath = `${ISLAND_DIRECTORY}/${basename}.tsx`;
 
         // 非同期処理のため、即座に次のアイランドに移る
-        hydrateIsland(island, componentName).then(() => {
+        hydrateIsland(island, componentName, modulePath).then(() => {
           island.setAttribute('data-app-hydrated', 'true');
         });
 
@@ -128,9 +130,8 @@ async function hydrateAllIslands() {
   console.log(`Immediately hydrated ${visible.length} visible islands, queued ${hidden.length} hidden islands for later hydration`);
 }
 
-async function hydrateIsland(element: Element, componentName: string) {
+async function hydrateIsland(element: Element, componentName: string, modulePath: string) {
   try {
-    const modulePath = `${ISLAND_DIRECTORY}/${componentName}.tsx`
     const importedModule = await COMPONENT_MODULES[modulePath]() as ComponentModule
 
     const Component = importedModule[componentName] ?? importedModule.default

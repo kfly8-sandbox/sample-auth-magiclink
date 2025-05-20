@@ -1,13 +1,13 @@
 import type { Result, ResultError } from '@/lib/utils'
 
-type VerifyEmailProps = {
+type SignUpProps = {
   email: string
   termsAccepted: boolean
 }
 
-type VerifyEmailResult = Result<null, ResultError<"TERMS_NOT_ACCEPTED" | "FAILED_TO_SEND_EMAIL">>
+type SignUpResult = Result<null, ResultError<"TERMS_NOT_ACCEPTED" | "FAILED_TO_SEND_EMAIL">>
 
-export async function verifyEmail({ email, termsAccepted }: VerifyEmailProps) : Promise<VerifyEmailResult> {
+export async function signup({ email, termsAccepted }: SignUpProps) : Promise<SignUpResult> {
   // 1. Generate a secure token
   // 2. Store the token in your database with the email and expiration
   // 3. Send an email with a link containing the token
@@ -21,12 +21,13 @@ export async function verifyEmail({ email, termsAccepted }: VerifyEmailProps) : 
     }
   }
 
+  // FIXME
   return {
     success: true,
     value: null,
   }
 
-  const res = await fetch("/api/auth/verify-email", {
+  const res = await fetch("/api/auth/signup", {
     method: "POST",
     body: JSON.stringify({ email }),
   })
@@ -46,6 +47,41 @@ export async function verifyEmail({ email, termsAccepted }: VerifyEmailProps) : 
     value: null,
   }
 }
+
+type SignInProps = {
+  email: string
+}
+
+type SignInResult = Result<null, ResultError<"FAILED_TO_SEND_EMAIL">>
+
+export async function signin({ email }: SignInProps) : Promise<SignInResult> {
+  // FIXME
+  return {
+    success: true,
+    value: null,
+  }
+
+  const res = await fetch("/api/auth/signin", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  })
+
+  if (res.status !== 200) {
+    return {
+      success: false,
+      error: {
+        code: "FAILED_TO_SEND_EMAIL",
+        message: "Failed to send email. Please try again.",
+      }
+    }
+  }
+
+  return {
+    success: true,
+    value: null,
+  }
+}
+
 
 type VerifyCodeProps = {
   email: string
